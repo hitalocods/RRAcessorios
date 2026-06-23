@@ -1,6 +1,6 @@
 import { unstable_noStore as noStore } from "next/cache";
 import type { Product } from "@/types/product";
-import { createClient } from "@/supabase/server";
+import { sql } from "@/lib/db";
 
 const fallbackProducts: Product[] = [
   {
@@ -53,17 +53,12 @@ export async function getProducts(): Promise<Product[]> {
   noStore();
 
   try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const products = await sql`
+      SELECT * FROM products
+      ORDER BY created_at DESC
+    `;
 
-    if (error) {
-      return fallbackProducts;
-    }
-
-    return data?.length ? (data as Product[]) : fallbackProducts;
+    return products.length > 0 ? (products as Product[]) : fallbackProducts;
   } catch {
     return fallbackProducts;
   }

@@ -1,32 +1,21 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createClient } from "@/supabase/server";
-import { isSupabaseConfigured } from "@/supabase/config";
+import { setAdminSession, clearAdminSession, validateCredentials } from "@/lib/auth";
 
 export async function signInAdmin(formData: FormData) {
-  if (!isSupabaseConfigured()) {
-    redirect("/admin/login?error=config");
-  }
-
   const email = String(formData.get("email") || "");
   const password = String(formData.get("password") || "");
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (error) {
+  if (!validateCredentials(email, password)) {
     redirect("/admin/login?error=invalid");
   }
 
+  await setAdminSession();
   redirect("/admin");
 }
 
 export async function signOutAdmin() {
-  if (!isSupabaseConfigured()) {
-    redirect("/admin/login?error=config");
-  }
-
-  const supabase = await createClient();
-  await supabase.auth.signOut();
+  await clearAdminSession();
   redirect("/admin/login");
 }

@@ -2,7 +2,6 @@ import { signInAdmin } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { isSupabaseConfigured } from "@/supabase/config";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +11,6 @@ export default async function AdminLogin({
   searchParams: Promise<{ error?: string }>;
 }) {
   const params = await searchParams;
-  const missingConfig = params.error === "config" || !isSupabaseConfigured();
 
   return (
     <main className="grid min-h-dvh place-items-center bg-background px-4">
@@ -21,11 +19,6 @@ export default async function AdminLogin({
           <p className="text-xs uppercase tracking-[0.24em] text-muted-foreground">Admin</p>
           <h1 className="text-2xl font-semibold tracking-tight">STORE</h1>
           {params.error === "invalid" && <p className="text-sm text-destructive">Credenciais invalidas.</p>}
-          {missingConfig && (
-            <p className="rounded-md border bg-muted p-3 text-sm text-muted-foreground">
-              Configure o Supabase no arquivo .env.local para ativar o login do admin.
-            </p>
-          )}
         </div>
         <div className="space-y-4">
           <div className="space-y-2">
@@ -37,7 +30,7 @@ export default async function AdminLogin({
             <Input id="password" name="password" type="password" required autoComplete="current-password" />
           </div>
         </div>
-        <Button className="h-11 w-full rounded-full" disabled={missingConfig}>
+        <Button className="h-11 w-full rounded-full">
           Entrar
         </Button>
       </form>

@@ -5,23 +5,15 @@ import { ProductForm } from "@/components/admin/product-form";
 import { AdminProducts } from "@/components/admin/admin-products";
 import { Button } from "@/components/ui/button";
 import { getProducts } from "@/services/products";
-import { createClient } from "@/supabase/server";
-import { isSupabaseConfigured } from "@/supabase/config";
+import { isAdminAuthenticated } from "@/lib/auth";
 import { formatCurrency } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  if (!isSupabaseConfigured()) {
-    redirect("/admin/login?error=config");
-  }
+  const isAdmin = await isAdminAuthenticated();
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  if (!isAdmin) {
     redirect("/admin/login");
   }
 

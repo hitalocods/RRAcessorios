@@ -2,20 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createAdminClient, createClient } from "@/supabase/server";
+import { isAdminAuthenticated } from "@/lib/auth";
 import { categories, type ProductCategory } from "@/types/product";
+import { uploadImageToBlob } from "@/lib/blob";
+import { sql } from "@/lib/db";
 
 async function assertAdmin() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const isAdmin = await isAdminAuthenticated();
 
-  if (!user) {
+  if (!isAdmin) {
     redirect("/admin/login");
   }
-
-  return user;
 }
 
 function getNumber(formData: FormData, key: string) {
@@ -36,42 +33,29 @@ async function uploadImage(file: File | null) {
     return null;
   }
 
-  const supabase = createAdminClient();
   const extension = file.name.split(".").pop() || "jpg";
   const fileName = `${crypto.randomUUID()}.${extension}`;
-  const path = `products/${fileName}`;
-  const buffer = await file.arrayBuffer();
+  const renamedFile = new File([file], fileName, { type: file.type });
 
-  const { error } = await supabase.storage.from("product-images").upload(path, buffer, {
-    contentType: file.type,
-    upsert: false,
-  });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-  return data.publicUrl;
+  return await uploadImageToBlob(renamedFile);
 }
 
 export async function createProduct(formData: FormData) {
   await assertAdmin();
   const imageUrl = await uploadImage(formData.get("image") as File | null);
-  const supabase = createAdminClient();
 
-  const { error } = await supabase.from("products").insert({
-    name: String(formData.get("name") || ""),
-    description: String(formData.get("description") || ""),
-    price: getNumber(formData, "price"),
-    category: getCategory(formData),
-    stock: Math.max(0, Math.round(getNumber(formData, "stock"))),
-    image_url: imageUrl,
-  });
-
-  if (error) {
-    throw new Error(error.message);
-  }
+  await sql`
+    INSERT INTO products (id, name, description, price, category, stock, image_url)
+    VALUES (
+      ${crypto.randomUUID()},
+      ${String(formData.get("name") || "")},
+      ${String(formData.get("description") || "")},
+      ${getNumber(formData, "price")},
+      ${getCategory(formData)},
+      ${Math.max(0, Math.round(getNumber(formData, "stock")))},
+      ${imageUrl}
+    )
+  `;
 
   revalidatePath("/");
   revalidatePath("/admin");
@@ -82,23 +66,18 @@ export async function updateProduct(formData: FormData) {
   const id = String(formData.get("id") || "");
   const currentImage = String(formData.get("current_image_url") || "");
   const imageUrl = (await uploadImage(formData.get("image") as File | null)) || currentImage || null;
-  const supabase = createAdminClient();
 
-  const { error } = await supabase
-    .from("products")
-    .update({
-      name: String(formData.get("name") || ""),
-      description: String(formData.get("description") || ""),
-      price: getNumber(formData, "price"),
-      category: getCategory(formData),
-      stock: Math.max(0, Math.round(getNumber(formData, "stock"))),
-      image_url: imageUrl,
-    })
-    .eq("id", id);
-
-  if (error) {
-    throw new Error(error.message);
-  }
+  await sql`
+    UPDATE products
+    SET
+      name = ${String(formData.get("name") || "")},
+      description = ${String(formData.get("description") || "")},
+      price = ${getNumber(formData, "price")},
+      category = ${getCategory(formData)},
+      stock = ${Math.max(0, Math.round(getNumber(formData, "stock")))},
+      image_url = ${imageUrl}
+    WHERE id = ${id}
+  `;
 
   revalidatePath("/");
   revalidatePath("/admin");
@@ -107,12 +86,11 @@ export async function updateProduct(formData: FormData) {
 export async function deleteProduct(formData: FormData) {
   await assertAdmin();
   const id = String(formData.get("id") || "");
-  const supabase = createAdminClient();
-  const { error } = await supabase.from("products").delete().eq("id", id);
 
-  if (error) {
-    throw new Error(error.message);
-  }
+  await sql`
+    DELETE FROM products
+    WHERE id = ${id}
+  `;
 
   revalidatePath("/");
   revalidatePath("/admin");
