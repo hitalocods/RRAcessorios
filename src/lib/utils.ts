@@ -11,7 +11,3 @@ export function formatCurrency(value: number) {
     currency: "BRL",
   }).format(value);
 }
-
-export function normalizeCategory(value: string) {
-  return value.normalize("NFD").replace(/\p{Diacritic}/gu, "");
-}

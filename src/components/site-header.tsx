@@ -20,8 +20,8 @@ export function SiteHeader({ onCartOpen }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b bg-white/78 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-3 sm:h-16 sm:px-6 lg:px-8">
-        <Link href="/" className="text-base font-semibold tracking-[0.26em] sm:text-lg sm:tracking-[0.28em]">
-          STORE
+        <Link href="/" className="text-base font-semibold tracking-tight sm:text-lg">
+          RR ACESSÓRIOS
         </Link>
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
           <a href="#products" className="transition hover:text-foreground">

@@ -1,10 +1,17 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "STORE | Acessorios premium",
-  description: "Loja moderna de acessorios, perfumes e tecnologia.",
+  title: "RR Acessórios | Capas, Perfumes e Tecnologia",
+  description: "Loja moderna de capas, acessórios para celular, perfumes e tecnologia.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({

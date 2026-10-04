@@ -1,13 +1,12 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { setAdminSession, clearAdminSession, validateCredentials } from "@/lib/auth";
+import { setAdminSession, clearAdminSession, validatePassword } from "@/lib/auth";
 
 export async function signInAdmin(formData: FormData) {
-  const email = String(formData.get("email") || "");
   const password = String(formData.get("password") || "");
 
-  if (!validateCredentials(email, password)) {
+  if (!validatePassword(password)) {
     redirect("/admin/login?error=invalid");
   }
 
