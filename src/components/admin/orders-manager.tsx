@@ -176,7 +176,9 @@ export function OrdersManager({ initialOrders }: OrdersManagerProps) {
                     <div className="flex items-start gap-2.5">
                       <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
                       <div className="text-sm">
-                        <p className="text-xs text-muted-foreground">Entrega</p>
+                        <p className="text-xs text-muted-foreground">
+                          {order.delivery_type === "pickup" ? "Modalidade: Retirada na Loja" : "Entrega em Domicílio"}
+                        </p>
                         <p className="font-medium text-foreground">
                           Bairro: {order.neighborhood_name || "Não informado"}
                         </p>
@@ -184,10 +186,27 @@ export function OrdersManager({ initialOrders }: OrdersManagerProps) {
                           <p className="text-xs text-muted-foreground">{order.address}</p>
                         )}
                         <p className="mt-0.5 text-xs text-muted-foreground">
-                          Taxa de entrega: {formatCurrency(order.delivery_fee)}
+                          Taxa de entrega:{" "}
+                          <span className={order.delivery_fee === 0 ? "text-emerald-600 font-semibold" : ""}>
+                            {order.delivery_fee === 0 ? "Grátis" : formatCurrency(order.delivery_fee)}
+                          </span>
                         </p>
                       </div>
                     </div>
+
+                    {order.payment_method && (
+                      <div className="rounded-lg border bg-stone-50/80 px-3 py-2 text-xs">
+                        <span className="text-muted-foreground">Pagamento: </span>
+                        <strong className="text-foreground">{order.payment_method}</strong>
+                      </div>
+                    )}
+
+                    {order.notes && (
+                      <div className="rounded-lg border border-amber-200 bg-amber-50/50 px-3 py-2 text-xs">
+                        <span className="text-amber-800 font-semibold">Obs: </span>
+                        <span className="text-stone-700">{order.notes}</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Itens do Pedido */}

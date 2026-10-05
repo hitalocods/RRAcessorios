@@ -102,3 +102,14 @@ export async function deleteNeighborhood(id: string): Promise<ActionResult> {
   refresh();
   return { ok: true };
 }
+
+// Ação pública para o carrinho buscar bairros e taxas sempre sincronizados em tempo real
+export async function getLiveNeighborhoods() {
+  try {
+    const rows = await sql`SELECT id, name, fee::float AS fee FROM neighborhoods ORDER BY name`;
+    return { ok: true, data: rows as { id: string; name: string; fee: number }[] };
+  } catch (error) {
+    console.error("Falha ao sincronizar bairros", error);
+    return { ok: false, data: [] };
+  }
+}

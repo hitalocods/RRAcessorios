@@ -36,9 +36,12 @@ export type Order = {
   id: string;
   number: number;
   customer_name: string;
+  delivery_type: "delivery" | "pickup";
   address: string | null;
   neighborhood_name: string | null;
   delivery_fee: number;
+  payment_method: string | null;
+  notes: string | null;
   subtotal: number;
   total: number;
   items: OrderItem[];

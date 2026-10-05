@@ -30,15 +30,22 @@ CREATE TABLE IF NOT EXISTS orders (
   id TEXT PRIMARY KEY,
   number SERIAL UNIQUE,
   customer_name TEXT NOT NULL,
+  delivery_type TEXT NOT NULL DEFAULT 'delivery',
   address TEXT,
   neighborhood_name TEXT,
   delivery_fee DECIMAL(10, 2) NOT NULL DEFAULT 0,
+  payment_method TEXT,
+  notes TEXT,
   subtotal DECIMAL(10, 2) NOT NULL,
   total DECIMAL(10, 2) NOT NULL,
   items JSONB NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_type TEXT DEFAULT 'delivery';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS notes TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_orders_status_created ON orders(status, created_at DESC);
 
@@ -48,3 +55,10 @@ INSERT INTO categories (id, name) VALUES
   ('cat-perfumes', 'Perfumes'),
   ('cat-carregadores', 'Carregadores')
 ON CONFLICT DO NOTHING;
+
+INSERT INTO neighborhoods (id, name, fee) VALUES
+  ('bairro-centro', 'Centro', 0.00),
+  ('bairro-zona-leste', 'Zona Leste', 10.00),
+  ('bairro-zona-sul', 'Zona Sul', 10.00),
+  ('bairro-zona-norte', 'Zona Norte', 12.00)
+ON CONFLICT (name) DO NOTHING;

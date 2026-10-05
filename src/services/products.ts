@@ -44,14 +44,14 @@ export async function getNeighborhoods(): Promise<Neighborhood[]> {
 export async function getOrders(status?: OrderStatus): Promise<Order[]> {
   const rows = status
     ? await sql`
-        SELECT id, number, customer_name, address, neighborhood_name, delivery_fee::float AS delivery_fee,
-               subtotal::float AS subtotal, total::float AS total, items, status, created_at
+        SELECT id, number, customer_name, delivery_type, address, neighborhood_name, delivery_fee::float AS delivery_fee,
+               payment_method, notes, subtotal::float AS subtotal, total::float AS total, items, status, created_at
         FROM orders WHERE status = ${status}
         ORDER BY created_at DESC LIMIT 200
       `
     : await sql`
-        SELECT id, number, customer_name, address, neighborhood_name, delivery_fee::float AS delivery_fee,
-               subtotal::float AS subtotal, total::float AS total, items, status, created_at
+        SELECT id, number, customer_name, delivery_type, address, neighborhood_name, delivery_fee::float AS delivery_fee,
+               payment_method, notes, subtotal::float AS subtotal, total::float AS total, items, status, created_at
         FROM orders
         ORDER BY created_at DESC LIMIT 200
       `;
